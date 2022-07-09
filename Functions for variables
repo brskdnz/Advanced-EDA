@@ -1,0 +1,195 @@
+# How to analyze a data set with Python ?
+# A new data set includes many informations that has various columns and rows and it tells a story that what we need to understand. 
+# This understanding process can be seperated four parts that are general impression, classification of variables, analysis of categorical variables, analysis of numerical variables, analysis of target variable, analysis of correlation. Firstly, it has to be good initial impression a new one creating with Python analyzing skills.
+# Let's start to with first step.
+
+# General Impression
+
+import pandas as pd
+import seaborn as sns 
+import matplotlib.pyplot as plt
+pd.set_option('display.max_columns',500)
+
+df = sns.load_dataset("titanic")
+
+def gen_imp(dataframe, number=20):
+    print("############################### Shape #####################################")
+    print("#############################", dataframe.shape, "########################" )
+    print("############################## Types ######################################")
+    print("#############################", dataframe.dtypes, "########################")
+    print("############################## Head #######################################")
+    print("############################", dataframe.head(number),"####################")
+    print("############################## Tail #######################################")
+    print("############################", dataframe.tail(number),"####################")
+    print("############################# NA ##########################################")
+    print("############################", dataframe.isnull().sum(),"##################")
+    print("############################ Quantiles ####################################")
+    print(dataframe.describe([0,0.05, 0.50, 0.95, 0.99, 1]).T)
+    
+gen_imp(df)
+
+# In that stage, Python has various packages for using capable of functions in this programming language.
+# So firstly, if you need to acessibility of those functions, it has to be import some packages. 
+# Also the number of displaying columns is settin with next code stage in pandas package.
+# Later, titanic is very well-known dataset that is loaded with nex code rowns and described as 'df'. 
+# The next step is creating function for initial impression that are using variables codes in maths and statistics, of new data set. 
+# Let's examine and interpetting of dataset.
+# Shape: it shows number of rows and columns. So titanic dataset has 891 rows and 15 columns. 
+# Dtypes: it shows each columns types. So it includes 4 int64 types, 2 float64 types 2 category types, 2 bool types, 5 object types. 
+# Head: it shows initial number of rows that can be described as a number in that function or already defined as 20 in that functions. 
+# We don't enter any number in the function. So it shows initial 20 of rows in titanic dataset. 
+# Tail: it shows last number of rows that can be described as a number in that function or already defined as 20 in that functions.
+# We don't enter any number in the function. So it shows last 20 of rows in titanic dataset. 
+# Isnull(): It makes questioning of the na that means unknown values and the answer shows as a bool type (True or False). 
+# If it adds ".sum()" end of code, that shows of the total na values of each of columns in a dataset. 
+# Clearly, age columns has 177 unknown rows, deck columns has 688 unknown rows, and embarked columns has 2 unknown columns in titanic dataset. 
+# Describe():It calculates and shows statistical information that count, mean, std, min in standard conditions. 
+# If it is added a list like [0,0.05, 0.50, 0.95, 0.99, 1], it sort from lowest value to highest value and that list shows 0% (minimum value), 5%, 50% (median value), 95%, 99%, and 100% (maximum value).
+# That functions is so cruical for assesting a new dataset regarding statistical knowledge.
+# If it is adding ".T", that shows more conveniently and that means transpose.
+
+# Classification of Variables
+
+def class_variables(dataframe, numbers_nbc=10, numbers_cbc=20):
+    
+    cat_cols = [col for col in dataframe.columns if str(dataframe[col].dtypes) in ["category", "object", "bool"]]
+    
+    num_but_cat = [col for col in dataframe.columns if dataframe[col].nunique() < numbers_nbc and dataframe[col].dtypes in ["int64", "float64"]]
+    
+    cat_but_car = []
+    
+    for col in dataframe.columns:
+        if dataframe[col].nunique() > numbers_cbc and str(dataframe[col].dtypes) in ["category", "object"]:
+            cat_but_car.append(col)
+    cat_cols = cat_cols + num_but_cat
+    cat_cols = [col for col in cat_cols if col not in cat_but_car]
+
+    num_cols = [col for col in dataframe.columns if dataframe[col].dtypes in ["int64", "float64"]]
+    num_cols = [col for col in num_cols if col not in cat_cols]
+
+    print(f"Observations: {dataframe.shape[0]}")
+    print(f"Variables: {dataframe.shape[1]}")
+    print(f'cat_cols: {len(cat_cols)}')
+    print(f'num_cols: {len(num_cols)}')
+    print(f'cat_but_car: {len(cat_but_car)}')
+    print(f'num_but_cat: {len(num_but_cat)}')
+
+    return cat_cols, num_cols, cat_but_car
+
+import seaborn as sns
+df = sns.load_dataset("titanic")
+class_variables(df)
+
+# In this part, "class_variables" function classifies variables as three class that are categorical variables, numerical variables, and categorical but cardinal variables. 
+# This part is significant to understanding variables in dataset. Categorical variables are includes object and category types. 
+# The important parts, these variables are seperated a meaningful category, so sometimes numerical variables are included these variables due to less diversity of variables. 
+# It should be less than the value of numbers_nbc that can be changed according to a dataset. 
+# On the other hand, it can be removed as a categorical type due to meaningless categorical variables so it can be defined as cardinal variables. 
+# Those variables have many categories so it is too hard classified as a categorical type. 
+# It should be higher than numbers_cbc that can be changed dataset. 
+# So in this dataset ("titanic") has 15 variables that are 13 categorical types and 2 numerical types.
+
+# Analysis of Categorical Variables
+
+import pandas as pd
+import seaborn as sns 
+import matplotlib.pyplot as plt
+
+df = sns.load_dataset("titanic")
+
+
+def cat_variables(dataframe, columns_name, plot=False):
+    if dataframe[columns_name].dtypes == "bool":
+        dataframe[columns_name] = dataframe[columns_name].astype(int)
+        print(pd.DataFrame({col_name: dataframe[columns_name].value_counts(),
+                           "Ratio": 100 * df[columns_name].value_counts() / len(dataframe)}))
+        print("############################################################################")
+        if plot:
+            sns.countplot(x=dataframe[columns_name], data=dataframe)
+            plt.show(block=True)
+    else:
+        print(pd.DataFrame({columns_name: dataframe[columns_name].value_counts(),
+                           "Ratio": 100 * df[columns_name].value_counts() / len(dataframe)}))
+        if plot:
+            sns.countplot(x=dataframe[columns_name], data=dataframe)
+            plt.show(block=True)
+
+            
+cat_variables(df,"embark_town", plot=True)
+
+# That function analyzing a categorical variables that are examined in each of category are showing counts of category and percentage of presence. 
+# In addition to, if plot is equal to "True", it shown as columnn chart according to count of category in that variable.
+
+# Analysis of Numeriacal Variables
+
+import pandas as pd
+import seaborn as sns 
+
+df = sns.load_dataset("titanic")
+
+def num_variables(dataframe, numerical_col, plot=False):
+    quantiles = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]
+    print(dataframe[numerical_col].describe(quantiles).T)
+
+    if plot:
+        dataframe[numerical_col].hist()
+        plt.xlabel(numerical_col)
+        plt.title(numerical_col)
+        plt.show(block=True)
+        
+num_variables(df,"age", plot=True)
+
+# That function show count, mean, standard deviation of variables and it shows some percantage of value as mentioned above as a list. 
+# Also, if "plot" is equal to "True", it shown as histogram graph that is shown count of variables equivalent and certain intervals.
+
+# Analysis of Target Variable
+
+import pandas as pd
+import seaborn as sns 
+import matplotlib.pyplot as plt
+
+df = sns.load_dataset("titanic")
+
+def target_analysis(dataframe, target,variable_type, col):
+    if (variable_type == "categorical"):
+        print(pd.DataFrame({"TARGET_MEAN": dataframe.groupby(col)[target].mean()}))
+    elif (variable_type == "numerical"):
+        print(dataframe.groupby(target).agg({col:"mean"}), end="\n\n\n")
+    else:
+        print("Please enter known type of variable type that can be 'categorical' or 'numerical'")
+        
+target_analysis(df,"survived", "numerical", "age")
+target_analysis(df,"survived", "categorical", "sex")
+
+# That functions is examined a target variable that is critical information and most important variable of dateset with categorical or numerical variables. 
+# It has to be known very well story of dataset to determine target variable. Also it has to know about type of variable so it can be analyzed with target variable.
+# Thus, one of them can be creating significant statiscial results with target variable in this part.
+
+# Analysis of Correlation
+
+import pandas as pd
+import seaborn as sns 
+
+df = sns.load_dataset("titanic")
+
+def high_correlated_cols(dataframe, plot=False, corr_th=0.90):
+    corr = dataframe.corr()
+    cor_matrix = corr.abs()
+    upper_triangle_matrix = cor_matrix.where(np.triu(np.ones(cor_matrix.shape), k=1).astype(np.bool))
+    drop_list = [col for col in upper_triangle_matrix.columns if any(upper_triangle_matrix[col] > corr_th)]
+    if plot:
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        sns.set(rc={'figure.figsize': (15, 15)})
+        sns.heatmap(corr, cmap="RdBu")
+        plt.show()
+    return drop_list
+
+high_correlated_cols(df, plot=True)
+
+# That function is examined with high correlated variables. if correlation values of these varibles are higher than "corr_th" it adds "drop_list". 
+# It can be shown as drop list that means it should be removed only one of them due to any obstructing analysis of dataset. 
+# Because these variables tells same story and it is more clarified that analysis of dataset with just one of them. 
+# Moreover, if plot is equal to "True", relationship of correlation with each other are shown in heatmap.
+
+# To sum up, a dataset is examined with classified variables and relationship with target variable in statistical informations and python programming language.
